@@ -93,14 +93,14 @@ function handleBlockChainResponse() {
 function queryAllMsg() {
   return ({
     "type": QUERY_ALL,
-    "data": null,
+    "data": null
   })
 }
 
 function queryLatestMsg() {
   return ({
     "type": QUERY_LATEST,
-    "data": null,
+    "data": null
   })
 }
 
