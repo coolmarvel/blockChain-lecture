@@ -41,10 +41,25 @@ function addBlock(newBlock) {
   return false
 }
 
+function isValidChain(newBlocks) {
+  if (JSON.stringify(newBlocks[0]) !== JSON.stringify(Blocks[0])) {
+    return false
+  }
+  let tempBlocks = [newBlocks[0]]
+  for (let i = 0; i < newBlocks.length; i++) {
+    if (isValidNewBlock(newBlocks[i], newBlocks[i - 1])) {
+      tempBlocks.push(newBlocks[i]);
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
 const block = nextBlock(['성현이 바보'])
 addBlock(block)
 
 console.log(Blocks)
 
 
-module.exports = { Blocks, addBlock, nextBlock, createHash, getVersion }
+module.exports = { Blocks, addBlock, nextBlock, createHash, getVersion, isValidChain }
