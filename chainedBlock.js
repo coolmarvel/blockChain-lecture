@@ -3,6 +3,9 @@ const merkle = require("merkle");
 const cryptojs = require("crypto-js");
 const random = require('random')
 
+const BLOCK_GENERATION_INTERVAL = 10  // 단위는 sec
+const DIFFICULTY_ADJUST_INTERVAL = 10 // in blocks
+
 class Block {
   constructor(header, body) {
     this.header = header;
@@ -168,16 +171,55 @@ function findBlock(currentVersion, nextIndex, previousHash, nextTimestamp, merkl
   }
 }
 
-const genesisBlock = createGenesisBlock();
-console.log(genesisBlock);
+function getDifficulty(blocks) {
+  const lastBlock = blocks[blocks.length - 1]
+  if (lastBlock.header.index !== 0 &&
+    lastBlock.header.index % DIFFICULTY_ADJUST_INTERVAL === 0) {
+    return getAdjustDifficulty(lastBlock, blocks)
+  }
+  return lastBlock.header.difficulty
+}
+
+function getAdjustDifficulty(lastBlock, blocks) {
+  const prevAdjustmentBlock = blocks[blocks.length - DIFFICULTY_ADJUST_INTERVAL]
+  const elapsedTime = lastBlock.header.timestamp - prevAdjustmentBlock.header.timestamp
+  const expectedTime = BLOCK_GENERATION_INTERVAL * DIFFICULTY_ADJUST_INTERVAL
+
+  if (elapsedTime / 2 > expectedTime) {
+    return prevAdjustmentBlock.header.difficulty + 1
+  }
+  else if (elapsedTime * 2 < expectedTime) {
+    return prevAdjustmentBlock.header.difficulty - 1
+  }
+  else {
+    return prevAdjustmentBlock.header.difficulty
+  }
+}
+
+function getCurrentTimestamp() {
+  return Math.round(Date().getTime() / 1000)
+}
+
+function isValidTimestamp(newBlock, prevBlock) {
+  if (newBlock.header.timestamp - prevBlock.header.timestamp < 60) {
+    return false
+  }
+  if (getCurrentTimestamp() - newBlock.header.timestamp < 60) {
+    return false
+  }
+  return true
+}
+
+// const genesisBlock = createGenesisBlock();
+// console.log(genesisBlock);
 
 //const block1 = nextBlock(["transaction1"])
 // console.log(block1);
 
-addBlock(['transaction2'])
-addBlock(['transaction3'])
-addBlock(['transaction4'])
-addBlock(['transaction5'])
-console.log(Blocks);
+// addBlock(['transaction2'])
+// addBlock(['transaction3'])
+// addBlock(['transaction4'])
+// addBlock(['transaction5'])
+// console.log(Blocks);
 
-module.exports = { getLastBlock, createHash, getBlocks, Blocks, nextBlock, getVersion }
+module.exports = { getLastBlock, createHash, getBlocks, Blocks, nextBlock, getVersion, addBlock, isValidTimestamp, hashMatchesDifficulty }

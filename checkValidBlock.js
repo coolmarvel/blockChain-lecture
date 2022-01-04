@@ -12,6 +12,8 @@ function isValidBlockStructure(block) {
     && typeof (block.header.previousHash) === 'string'
     && typeof (block.header.timestamp) === 'number'
     && typeof (block.header.merkleRoot) === 'string'
+    && typeof (block.header.difficulty) === 'number'
+    && typeof (block.header.nonce) === 'number'
     && typeof (block.data) === 'object'
 }
 
@@ -28,6 +30,12 @@ function isValidNewBlock(newBlock, previousBlock) {
   } else if (newBlock.data.length === 0 && ('0'.repeat(64) !== newBlock.header.merkleRoot)
     || newBlock.data.length !== 0 && (merkle('sha256').sync(newBlock.data).root() !== newBlock.header.merkleRoot)) {
     console.log('Invalid merkleRoot')
+    return false
+  } else if (!isValidTimestamp(newBlock, previousBlock)) {
+    console.log("Invalid Timestamp")
+    return false
+  } else if (!hashMatchesDifficulty(createHash(newBlock), newBlock.header.difficulty)) {
+    console.log("Invalid hash")
     return false
   }
   return true
