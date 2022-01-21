@@ -8,6 +8,7 @@
     "merkle": "^0.6.0",
     "process": "^0.11.10",
     "random": "^3.0.6",
+    "secp256k1": "^4.0.3",
     "ws": "^8.4.0"
   },
   "name": "blockchain",
